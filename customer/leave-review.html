@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Review - TES Real Estate</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="header">
+            <div class="header-content">
+                <a href="/customer/my-bookings.html" style="text-decoration: none; font-size: 1.5rem;">‹</a>
+                <h1 class="header-title">Leave Review</h1>
+                <div></div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="card">
+                <h3>How was your experience?</h3>
+                <form id="reviewForm">
+                    <div class="form-group">
+                        <label class="form-label">Overall Rating</label>
+                        <div id="overallRating"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Property Rating</label>
+                        <div id="propertyRating"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Agent Rating</label>
+                        <div id="agentRating"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="comment" class="form-label">Your Review</label>
+                        <textarea id="comment" class="form-control" rows="5" placeholder="Share your experience..." required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">Submit Review</button>
+                </form>
+            </div>
+        </div>
+        
+        <nav class="bottom-nav">
+            <div class="bottom-nav-items">
+                <a href="/customer/dashboard.html" class="nav-item">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Home</div>
+                </a>
+                <a href="/customer/my-bookings.html" class="nav-item active">
+                    <div class="nav-icon">📅</div>
+                    <div class="nav-label">Bookings</div>
+                </a>
+                <a href="/customer/book-appointment.html" class="nav-item">
+                    <div class="nav-icon">➕</div>
+                    <div class="nav-label">Book</div>
+                </a>
+                <a href="/customer/profile.html" class="nav-item">
+                    <div class="nav-icon">👤</div>
+                    <div class="nav-label">Profile</div>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/customer.js"></script>
+    <script>
+        const currentUser = requireAuth('customer');
+        if (!currentUser) return;
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const appointmentId = parseInt(urlParams.get('id'));
+        
+        if (!appointmentId || !canReviewAppointment(appointmentId, currentUser.id)) {
+            window.location.href = '/customer/my-bookings.html';
+            return;
+        }
+        
+        const details = getAppointmentDetails(appointmentId);
+        let ratings = { overall: 0, property: 0, agent: 0 };
+        
+        document.getElementById('overallRating').innerHTML = renderStars(0, true);
+        document.getElementById('propertyRating').innerHTML = renderStars(0, true);
+        document.getElementById('agentRating').innerHTML = renderStars(0, true);
+        
+        setupStarRating(document.getElementById('overallRating'), (rating) => ratings.overall = rating);
+        setupStarRating(document.getElementById('propertyRating'), (rating) => ratings.property = rating);
+        setupStarRating(document.getElementById('agentRating'), (rating) => ratings.agent = rating);
+        
+        document.getElementById('reviewForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (!ratings.overall || !ratings.property || !ratings.agent) {
+                showErrorAlert('Please provide all ratings');
+                return;
+            }
+            
+            const comment = document.getElementById('comment').value.trim();
+            if (!comment) {
+                showErrorAlert('Please write a review');
+                return;
+            }
+            
+            const reviewData = {
+                customerId: currentUser.id,
+                propertyId: details.propertyId,
+                appointmentId: appointmentId,
+                agentId: details.agentId,
+                rating: ratings.overall,
+                propertyRating: ratings.property,
+                agentRating: ratings.agent,
+                comment: comment
+            };
+            
+            const result = submitReview(reviewData);
+            if (result.success) {
+                showSuccessAlert('Review submitted for moderation');
+                setTimeout(() => {
+                    window.location.href = '/customer/my-reviews.html';
+                }, 1500);
+            } else {
+                showErrorAlert('Failed to submit review');
+            }
+        });
+    </script>
+</body>
+</html>

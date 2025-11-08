@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - TES Real Estate</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="header">
+            <div class="header-content">
+                <a href="/customer/profile.html" style="text-decoration: none; font-size: 1.5rem;">‹</a>
+                <h1 class="header-title">Edit Profile</h1>
+                <div></div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="card">
+                <form id="editProfileForm">
+                    <div class="form-group">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" id="name" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" class="form-control" required>
+                        <div class="form-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="tel" id="phone" class="form-control" required>
+                        <div class="form-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address" class="form-label">Address</label>
+                        <input type="text" id="address" class="form-control">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+                </form>
+            </div>
+        </div>
+        
+        <nav class="bottom-nav">
+            <div class="bottom-nav-items">
+                <a href="/customer/dashboard.html" class="nav-item">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Home</div>
+                </a>
+                <a href="/customer/my-bookings.html" class="nav-item">
+                    <div class="nav-icon">📅</div>
+                    <div class="nav-label">Bookings</div>
+                </a>
+                <a href="/customer/book-appointment.html" class="nav-item">
+                    <div class="nav-icon">➕</div>
+                    <div class="nav-label">Book</div>
+                </a>
+                <a href="/customer/profile.html" class="nav-item active">
+                    <div class="nav-icon">👤</div>
+                    <div class="nav-label">Profile</div>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        const currentUser = requireAuth('customer');
+        if (!currentUser) return;
+        
+        const user = getUserById(currentUser.id);
+        
+        document.getElementById('name').value = user.name;
+        document.getElementById('email').value = user.email;
+        document.getElementById('phone').value = user.phone;
+        document.getElementById('address').value = user.address || '';
+        
+        document.getElementById('editProfileForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const updates = {
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                address: document.getElementById('address').value.trim()
+            };
+            
+            const result = updateProfile(user.id, updates);
+            if (result.success) {
+                showSuccessAlert('Profile updated successfully');
+                setTimeout(() => {
+                    window.location.href = '/customer/profile.html';
+                }, 1000);
+            } else {
+                showErrorAlert(result.message);
+            }
+        });
+    </script>
+</body>
+</html>

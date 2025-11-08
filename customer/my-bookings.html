@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - TES Real Estate</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <h1 class="header-title">My Bookings</h1>
+                <div></div>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content-area">
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" data-status="all">All</div>
+                <div class="tab" data-status="upcoming">Upcoming</div>
+                <div class="tab" data-status="completed">Completed</div>
+                <div class="tab" data-status="cancelled">Cancelled</div>
+            </div>
+            
+            <!-- Bookings List -->
+            <div id="bookingsList">
+                <!-- Bookings will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="bottom-nav-items">
+                <a href="/customer/dashboard.html" class="nav-item">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Home</div>
+                </a>
+                <a href="/customer/my-bookings.html" class="nav-item active">
+                    <div class="nav-icon">📅</div>
+                    <div class="nav-label">Bookings</div>
+                </a>
+                <a href="/customer/book-appointment.html" class="nav-item">
+                    <div class="nav-icon">➕</div>
+                    <div class="nav-label">Book</div>
+                </a>
+                <a href="/customer/profile.html" class="nav-item">
+                    <div class="nav-icon">👤</div>
+                    <div class="nav-label">Profile</div>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/customer.js"></script>
+    <script>
+        // Check authentication
+        const currentUser = requireAuth('customer');
+        if (!currentUser) return;
+        
+        let currentFilter = 'all';
+        
+        // Load bookings
+        function loadBookings() {
+            let appointments = getCustomerBookings(currentUser.id);
+            
+            // Apply filter
+            if (currentFilter !== 'all') {
+                if (currentFilter === 'upcoming') {
+                    appointments = appointments.filter(a => 
+                        (a.status === 'confirmed' || a.status === 'pending') && 
+                        new Date(a.date) >= new Date()
+                    );
+                } else {
+                    appointments = appointments.filter(a => a.status === currentFilter);
+                }
+            }
+            
+            // Sort by date (newest first)
+            appointments.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const container = document.getElementById('bookingsList');
+            
+            if (appointments.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📅</div>
+                        <p>No bookings found</p>
+                        <a href="/customer/book-appointment.html" class="btn btn-primary btn-sm">
+                            Book Appointment
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = appointments.map(appointment => {
+                const details = getAppointmentDetails(appointment.id);
+                return `
+                    <div class="card" style="cursor: pointer;" onclick="viewBooking(${appointment.id})">
+                        <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 1rem;">
+                            <div style="flex: 1;">
+                                <h4 style="margin-bottom: 0.5rem;">${details.property.name}</h4>
+                                <p class="text-gray text-sm" style="margin: 0;">
+                                    Booking ID: ${appointment.bookingId}
+                                </p>
+                            </div>
+                            ${getStatusBadge(appointment.status)}
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">
+                            <div>📅 ${formatDate(appointment.date)}</div>
+                            <div>⏰ ${appointment.time}</div>
+                            <div>📍 ${details.property.location}</div>
+                            <div>👨‍💼 ${details.agent.name}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentFilter = tab.dataset.status;
+                loadBookings();
+            });
+        });
+        
+        // View booking details
+        window.viewBooking = function(appointmentId) {
+            window.location.href = `/customer/booking-details.html?id=${appointmentId}`;
+        };
+        
+        // Initial load
+        loadBookings();
+    </script>
+</body>
+</html>
