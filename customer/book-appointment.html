@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment - TES Real Estate</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <a href="/customer/dashboard.html" style="text-decoration: none; font-size: 1.5rem;">‹</a>
+                <h1 class="header-title">Book Appointment</h1>
+                <div></div>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content-area">
+            <!-- Progress Steps -->
+            <div class="progress-steps">
+                <div class="progress-step active" id="step1Indicator">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Property</div>
+                </div>
+                <div class="progress-step" id="step2Indicator">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Date</div>
+                </div>
+                <div class="progress-step" id="step3Indicator">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Time</div>
+                </div>
+                <div class="progress-step" id="step4Indicator">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Confirm</div>
+                </div>
+            </div>
+            
+            <!-- Step 1: Choose Property -->
+            <div id="step1" class="booking-step">
+                <div class="card">
+                    <h3>Select Property</h3>
+                    
+                    <!-- Search Bar -->
+                    <div class="search-bar">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" id="propertySearch" placeholder="Search properties...">
+                    </div>
+                    
+                    <!-- Filters -->
+                    <div class="filters">
+                        <button class="filter-chip active" data-type="all">All</button>
+                        <button class="filter-chip" data-type="House">House</button>
+                        <button class="filter-chip" data-type="Condominium">Condo</button>
+                        <button class="filter-chip" data-type="Townhouse">Townhouse</button>
+                        <button class="filter-chip" data-type="Lot">Lot</button>
+                    </div>
+                    
+                    <!-- Properties List -->
+                    <div id="propertiesList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                        <!-- Properties will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Select Date -->
+            <div id="step2" class="booking-step hidden">
+                <div class="card">
+                    <h3>Select Date</h3>
+                    <div id="calendarContainer"></div>
+                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                        <button class="btn btn-secondary" onclick="previousStep()">Back</button>
+                        <button class="btn btn-primary" style="flex: 1;" onclick="nextStep()" id="dateNextBtn" disabled>Next</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Choose Time Slot -->
+            <div id="step3" class="booking-step hidden">
+                <div class="card">
+                    <h3>Select Time Slot</h3>
+                    <p class="text-gray">Choose your preferred time for the viewing</p>
+                    
+                    <div class="time-slots">
+                        <div class="time-slot-group">
+                            <div class="time-slot-header">🌅 Morning</div>
+                            <div class="time-slot-grid">
+                                <button class="time-slot" data-time="9:00 AM - 10:00 AM">9:00 AM - 10:00 AM</button>
+                                <button class="time-slot" data-time="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</button>
+                                <button class="time-slot" data-time="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</button>
+                            </div>
+                        </div>
+                        
+                        <div class="time-slot-group">
+                            <div class="time-slot-header">☀️ Afternoon</div>
+                            <div class="time-slot-grid">
+                                <button class="time-slot" data-time="1:00 PM - 2:00 PM">1:00 PM - 2:00 PM</button>
+                                <button class="time-slot" data-time="2:00 PM - 3:00 PM">2:00 PM - 3:00 PM</button>
+                                <button class="time-slot" data-time="3:00 PM - 4:00 PM">3:00 PM - 4:00 PM</button>
+                            </div>
+                        </div>
+                        
+                        <div class="time-slot-group">
+                            <div class="time-slot-header">🌆 Evening</div>
+                            <div class="time-slot-grid">
+                                <button class="time-slot" data-time="4:00 PM - 5:00 PM">4:00 PM - 5:00 PM</button>
+                                <button class="time-slot" data-time="5:00 PM - 6:00 PM">5:00 PM - 6:00 PM</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                        <button class="btn btn-secondary" onclick="previousStep()">Back</button>
+                        <button class="btn btn-primary" style="flex: 1;" onclick="nextStep()" id="timeNextBtn" disabled>Next</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 4: Confirm Booking -->
+            <div id="step4" class="booking-step hidden">
+                <div class="card">
+                    <h3>Confirm Booking</h3>
+                    <p class="text-gray">Review your appointment details</p>
+                    
+                    <div style="margin-top: 1.5rem;">
+                        <div class="list-item">
+                            <div>
+                                <strong>Property</strong>
+                                <p id="confirmProperty" class="text-gray" style="margin: 0.25rem 0 0 0;"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="list-item">
+                            <div>
+                                <strong>Date & Time</strong>
+                                <p id="confirmDateTime" class="text-gray" style="margin: 0.25rem 0 0 0;"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="list-item">
+                            <div>
+                                <strong>Agent</strong>
+                                <p id="confirmAgent" class="text-gray" style="margin: 0.25rem 0 0 0;"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 1.5rem;">
+                        <label for="specialRequests" class="form-label">Special Requests (Optional)</label>
+                        <textarea 
+                            id="specialRequests" 
+                            class="form-control" 
+                            placeholder="Any special requirements or questions..."
+                            rows="4"
+                        ></textarea>
+                    </div>
+                    
+                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                        <button class="btn btn-secondary" onclick="previousStep()">Back</button>
+                        <button class="btn btn-primary" style="flex: 1;" onclick="confirmBooking()">Confirm Booking</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Success Screen (hidden by default) -->
+            <div id="successScreen" class="hidden">
+                <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+                    <div style="font-size: 4rem; color: var(--success-green); margin-bottom: 1rem;">✓</div>
+                    <h2 style="color: var(--success-green); margin-bottom: 1rem;">Booking Successful!</h2>
+                    <p class="text-gray" style="margin-bottom: 2rem;">
+                        Your appointment request has been submitted.<br>
+                        Booking ID: <strong id="bookingId"></strong>
+                    </p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 1rem; max-width: 300px; margin: 0 auto;">
+                        <a href="/customer/my-bookings.html" class="btn btn-primary">View My Bookings</a>
+                        <a href="/customer/dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="bottom-nav-items">
+                <a href="/customer/dashboard.html" class="nav-item">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Home</div>
+                </a>
+                <a href="/customer/my-bookings.html" class="nav-item">
+                    <div class="nav-icon">📅</div>
+                    <div class="nav-label">Bookings</div>
+                </a>
+                <a href="/customer/book-appointment.html" class="nav-item active">
+                    <div class="nav-icon">➕</div>
+                    <div class="nav-label">Book</div>
+                </a>
+                <a href="/customer/profile.html" class="nav-item">
+                    <div class="nav-icon">👤</div>
+                    <div class="nav-label">Profile</div>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/customer.js"></script>
+    <script>
+        // Check authentication
+        const currentUser = requireAuth('customer');
+        if (!currentUser) return;
+        
+        // Booking state
+        let currentStep = 1;
+        let selectedProperty = null;
+        let selectedDate = null;
+        let selectedTime = null;
+        
+        // Check if property was pre-selected
+        const preSelectedPropertyId = localStorage.getItem('selectedProperty');
+        if (preSelectedPropertyId) {
+            localStorage.removeItem('selectedProperty');
+            selectedProperty = getPropertyById(parseInt(preSelectedPropertyId));
+            if (selectedProperty) {
+                currentStep = 2;
+                showStep(2);
+            }
+        }
+        
+        // Load properties
+        let allProperties = getAvailableProperties();
+        let filteredProperties = allProperties;
+        
+        function renderProperties() {
+            const container = document.getElementById('propertiesList');
+            
+            if (filteredProperties.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-icon">🏠</div>
+                        <p>No properties found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filteredProperties.map(property => `
+                <div class="property-card" onclick="selectProperty(${property.id})">
+                    <div class="property-image">🏢</div>
+                    <div class="property-info">
+                        <div class="property-name">${property.name}</div>
+                        <div class="property-type">${property.type}</div>
+                        <div class="property-price">${formatCurrency(property.price)}</div>
+                        <div class="property-location">📍 ${property.location}</div>
+                        ${property.bedrooms ? `
+                            <div class="property-details">
+                                <span>🛏️ ${property.bedrooms}</span>
+                                <span>🚿 ${property.bathrooms}</span>
+                                <span>📐 ${property.floorArea} sqm</span>
+                            </div>
+                        ` : `
+                            <div class="property-details">
+                                <span>📐 ${property.lotArea} sqm</span>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Filter properties
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                
+                const type = chip.dataset.type;
+                if (type === 'all') {
+                    filteredProperties = allProperties;
+                } else {
+                    filteredProperties = allProperties.filter(p => p.type === type);
+                }
+                
+                renderProperties();
+            });
+        });
+        
+        // Search properties
+        document.getElementById('propertySearch').addEventListener('input', debounce((e) => {
+            const search = e.target.value.trim();
+            filteredProperties = getAvailableProperties({ search });
+            renderProperties();
+        }, 300));
+        
+        // Initial render
+        renderProperties();
+        
+        // Select property
+        window.selectProperty = function(propertyId) {
+            selectedProperty = getPropertyById(propertyId);
+            nextStep();
+        };
+        
+        // Setup calendar (Step 2)
+        let calendarInstance = null;
+        function setupCalendarStep() {
+            if (!calendarInstance) {
+                calendarInstance = setupCalendar(
+                    document.getElementById('calendarContainer'),
+                    (date) => {
+                        selectedDate = date;
+                        document.getElementById('dateNextBtn').disabled = false;
+                    }
+                );
+            }
+        }
+        
+        // Setup time slots (Step 3)
+        document.querySelectorAll('.time-slot').forEach(slot => {
+            slot.addEventListener('click', () => {
+                document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                slot.classList.add('selected');
+                selectedTime = slot.dataset.time;
+                document.getElementById('timeNextBtn').disabled = false;
+            });
+        });
+        
+        // Navigation functions
+        function showStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.booking-step').forEach(s => s.classList.add('hidden'));
+            
+            // Show current step
+            document.getElementById('step' + step).classList.remove('hidden');
+            
+            // Update progress indicators
+            for (let i = 1; i <= 4; i++) {
+                const indicator = document.getElementById('step' + i + 'Indicator');
+                if (i < step) {
+                    indicator.classList.add('completed');
+                    indicator.classList.remove('active');
+                } else if (i === step) {
+                    indicator.classList.add('active');
+                    indicator.classList.remove('completed');
+                } else {
+                    indicator.classList.remove('active', 'completed');
+                }
+            }
+            
+            // Special setup for steps
+            if (step === 2) {
+                setupCalendarStep();
+            } else if (step === 4) {
+                updateConfirmationDetails();
+            }
+            
+            currentStep = step;
+        }
+        
+        function nextStep() {
+            if (currentStep < 4) {
+                showStep(currentStep + 1);
+            }
+        }
+        
+        function previousStep() {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        }
+        
+        // Update confirmation details
+        function updateConfirmationDetails() {
+            const property = getPropertyDetails(selectedProperty.id);
+            
+            document.getElementById('confirmProperty').textContent = 
+                `${property.name} - ${property.location}`;
+            
+            document.getElementById('confirmDateTime').textContent = 
+                `${formatDate(selectedDate)} at ${selectedTime}`;
+            
+            document.getElementById('confirmAgent').textContent = 
+                `${property.agent.name} (${property.agent.agency})`;
+        }
+        
+        // Confirm booking
+        function confirmBooking() {
+            const property = getPropertyDetails(selectedProperty.id);
+            
+            const bookingData = {
+                customerId: currentUser.id,
+                agentId: property.agentId,
+                propertyId: selectedProperty.id,
+                date: selectedDate,
+                time: selectedTime,
+                notes: document.getElementById('specialRequests').value.trim()
+            };
+            
+            const result = bookAppointment(bookingData);
+            
+            if (result.success) {
+                // Hide all steps
+                document.querySelectorAll('.booking-step').forEach(s => s.classList.add('hidden'));
+                
+                // Show success screen
+                document.getElementById('successScreen').classList.remove('hidden');
+                document.getElementById('bookingId').textContent = result.appointment.bookingId;
+                
+                // Hide progress steps
+                document.querySelector('.progress-steps').classList.add('hidden');
+            } else {
+                showErrorAlert('Failed to create booking. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

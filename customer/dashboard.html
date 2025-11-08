@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TES Real Estate</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <h1 class="header-title">Dashboard</h1>
+                <div class="header-actions">
+                    <a href="/customer/notifications.html" style="position: relative; text-decoration: none; font-size: 1.5rem;">
+                        🔔
+                        <span id="notificationBadge" class="notification-badge hidden">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content-area">
+            <!-- Welcome Section -->
+            <div class="card">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="avatar avatar-lg" id="userAvatar">U</div>
+                    <div>
+                        <h2 style="margin-bottom: 0.25rem;" id="userName">Welcome</h2>
+                        <p class="text-gray" style="margin: 0;">Find your dream property today</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-value" id="totalBookings">0</div>
+                    <div class="stat-label">Total Bookings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏰</div>
+                    <div class="stat-value" id="upcomingBookings">0</div>
+                    <div class="stat-label">Upcoming</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-value" id="totalReviews">0</div>
+                    <div class="stat-label">Reviews</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value" id="completedBookings">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <h3>Quick Actions</h3>
+            <div class="quick-actions">
+                <a href="/customer/book-appointment.html" class="action-card">
+                    <div class="action-icon">🏠</div>
+                    <div class="action-label">Book Appointment</div>
+                </a>
+                <a href="/customer/my-bookings.html" class="action-card">
+                    <div class="action-icon">📋</div>
+                    <div class="action-label">My Bookings</div>
+                </a>
+                <a href="/customer/my-reviews.html" class="action-card">
+                    <div class="action-icon">⭐</div>
+                    <div class="action-label">My Reviews</div>
+                </a>
+                <a href="/customer/help.html" class="action-card">
+                    <div class="action-icon">❓</div>
+                    <div class="action-label">Help & Support</div>
+                </a>
+            </div>
+            
+            <!-- Upcoming Appointments -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Upcoming Appointments</h3>
+                </div>
+                <div id="upcomingAppointmentsList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📅</div>
+                        <p>No upcoming appointments</p>
+                        <a href="/customer/book-appointment.html" class="btn btn-primary btn-sm">
+                            Book Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Featured Properties -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Featured Properties</h3>
+                </div>
+                <div id="featuredProperties" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+                    <!-- Properties will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="bottom-nav-items">
+                <a href="/customer/dashboard.html" class="nav-item active">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Home</div>
+                </a>
+                <a href="/customer/my-bookings.html" class="nav-item">
+                    <div class="nav-icon">📅</div>
+                    <div class="nav-label">Bookings</div>
+                </a>
+                <a href="/customer/book-appointment.html" class="nav-item">
+                    <div class="nav-icon">➕</div>
+                    <div class="nav-label">Book</div>
+                </a>
+                <a href="/customer/profile.html" class="nav-item">
+                    <div class="nav-icon">👤</div>
+                    <div class="nav-label">Profile</div>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/customer.js"></script>
+    <script>
+        // Check authentication
+        const currentUser = requireAuth('customer');
+        if (!currentUser) return;
+        
+        // Display user info
+        document.getElementById('userName').textContent = `Welcome, ${currentUser.name.split(' ')[0]}!`;
+        document.getElementById('userAvatar').textContent = getInitials(currentUser.name);
+        
+        // Load stats
+        const stats = getCustomerStats(currentUser.id);
+        document.getElementById('totalBookings').textContent = stats.totalBookings;
+        document.getElementById('upcomingBookings').textContent = stats.upcomingBookings;
+        document.getElementById('totalReviews').textContent = stats.totalReviews;
+        document.getElementById('completedBookings').textContent = stats.completedBookings;
+        
+        // Load notification count
+        const unreadCount = getUnreadNotificationCount(currentUser.id);
+        if (unreadCount > 0) {
+            const badge = document.getElementById('notificationBadge');
+            badge.textContent = unreadCount;
+            badge.classList.remove('hidden');
+        }
+        
+        // Load upcoming appointments
+        const appointments = getCustomerBookings(currentUser.id);
+        const upcoming = appointments.filter(a => 
+            a.status === 'confirmed' && new Date(a.date) >= new Date()
+        ).sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        const appointmentsList = document.getElementById('upcomingAppointmentsList');
+        if (upcoming.length > 0) {
+            appointmentsList.innerHTML = upcoming.slice(0, 3).map(appointment => {
+                const details = getAppointmentDetails(appointment.id);
+                return `
+                    <div class="list-item">
+                        <div class="list-item-content">
+                            <div class="list-item-title">${details.property.name}</div>
+                            <div class="list-item-subtitle">
+                                📅 ${formatDate(appointment.date)} • ${appointment.time}<br>
+                                📍 ${details.property.location}<br>
+                                👨‍💼 ${details.agent.name}
+                            </div>
+                        </div>
+                        <div class="list-item-actions">
+                            ${getStatusBadge(appointment.status)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (upcoming.length > 3) {
+                appointmentsList.innerHTML += `
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <a href="/customer/my-bookings.html" class="btn btn-secondary btn-sm">
+                            View All Appointments
+                        </a>
+                    </div>
+                `;
+            }
+        }
+        
+        // Load featured properties
+        const properties = getAvailableProperties();
+        const featuredContainer = document.getElementById('featuredProperties');
+        
+        if (properties.length > 0) {
+            featuredContainer.innerHTML = properties.slice(0, 6).map(property => `
+                <div class="property-card" onclick="viewProperty(${property.id})">
+                    <div class="property-image">🏢</div>
+                    <div class="property-info">
+                        <div class="property-name">${property.name}</div>
+                        <div class="property-type">${property.type}</div>
+                        <div class="property-price">${formatCurrency(property.price)}</div>
+                        <div class="property-location">📍 ${property.location}</div>
+                        ${property.bedrooms ? `
+                            <div class="property-details">
+                                <span>🛏️ ${property.bedrooms} BR</span>
+                                <span>🚿 ${property.bathrooms} BA</span>
+                                <span>📐 ${property.floorArea} sqm</span>
+                            </div>
+                        ` : `
+                            <div class="property-details">
+                                <span>📐 ${property.lotArea} sqm</span>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            featuredContainer.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🏠</div>
+                    <p>No properties available</p>
+                </div>
+            `;
+        }
+        
+        // View property function
+        function viewProperty(propertyId) {
+            localStorage.setItem('selectedProperty', propertyId);
+            window.location.href = '/customer/book-appointment.html';
+        }
+    </script>
+</body>
+</html>

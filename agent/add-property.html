@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Property - TES Real Estate</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="header">
+            <div class="header-content">
+                <a href="/agent/properties.html" style="text-decoration: none; font-size: 1.5rem;">‹</a>
+                <h1 class="header-title">Add Property</h1>
+                <div></div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="card">
+                <form id="propertyForm">
+                    <div class="form-group">
+                        <label for="name" class="form-label">Property Name</label>
+                        <input type="text" id="name" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="type" class="form-label">Property Type</label>
+                        <select id="type" class="form-control" required>
+                            <option value="">Select type</option>
+                            <option value="House">House</option>
+                            <option value="Condominium">Condominium</option>
+                            <option value="Townhouse">Townhouse</option>
+                            <option value="Lot">Lot</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="price" class="form-label">Price (₱)</label>
+                        <input type="number" id="price" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" id="location" class="form-control" placeholder="City, Province" required>
+                    </div>
+                    
+                    <div id="houseFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="bedrooms" class="form-label">Bedrooms</label>
+                            <input type="number" id="bedrooms" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bathrooms" class="form-label">Bathrooms</label>
+                            <input type="number" id="bathrooms" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="floorArea" class="form-label">Floor Area (sqm)</label>
+                            <input type="number" id="floorArea" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div id="lotFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="lotArea" class="form-label">Lot Area (sqm)</label>
+                            <input type="number" id="lotArea" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea id="description" class="form-control" rows="4" required></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem;">
+                        <a href="/agent/properties.html" class="btn btn-secondary" style="flex: 1;">Cancel</a>
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Add Property</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <nav class="bottom-nav">
+            <div class="bottom-nav-items">
+                <a href="/agent/dashboard.html" class="nav-item">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Home</div>
+                </a>
+                <a href="/agent/appointments.html" class="nav-item">
+                    <div class="nav-icon">📅</div>
+                    <div class="nav-label">Appointments</div>
+                </a>
+                <a href="/agent/properties.html" class="nav-item active">
+                    <div class="nav-icon">🏢</div>
+                    <div class="nav-label">Properties</div>
+                </a>
+                <a href="/agent/profile.html" class="nav-item">
+                    <div class="nav-icon">👤</div>
+                    <div class="nav-label">Profile</div>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/agent.js"></script>
+    <script>
+        const currentUser = requireAuth('agent');
+        if (!currentUser) return;
+        
+        const typeSelect = document.getElementById('type');
+        const houseFields = document.getElementById('houseFields');
+        const lotFields = document.getElementById('lotFields');
+        
+        typeSelect.addEventListener('change', () => {
+            const type = typeSelect.value;
+            if (type === 'Lot') {
+                houseFields.style.display = 'none';
+                lotFields.style.display = 'block';
+            } else if (type) {
+                houseFields.style.display = 'block';
+                lotFields.style.display = 'none';
+            } else {
+                houseFields.style.display = 'none';
+                lotFields.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('propertyForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const propertyData = {
+                name: document.getElementById('name').value.trim(),
+                type: document.getElementById('type').value,
+                price: document.getElementById('price').value,
+                location: document.getElementById('location').value.trim(),
+                description: document.getElementById('description').value.trim(),
+                agentId: currentUser.id
+            };
+            
+            if (propertyData.type !== 'Lot') {
+                propertyData.bedrooms = document.getElementById('bedrooms').value;
+                propertyData.bathrooms = document.getElementById('bathrooms').value;
+                propertyData.floorArea = document.getElementById('floorArea').value;
+            } else {
+                propertyData.lotArea = document.getElementById('lotArea').value;
+            }
+            
+            const result = addProperty(propertyData);
+            if (result.success) {
+                showSuccessAlert('Property added and pending approval');
+                setTimeout(() => {
+                    window.location.href = '/agent/properties.html';
+                }, 1500);
+            } else {
+                showErrorAlert('Failed to add property');
+            }
+        });
+    </script>
+</body>
+</html>

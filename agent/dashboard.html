@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Dashboard - TES Real Estate</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="header">
+            <div class="header-content">
+                <h1 class="header-title">Dashboard</h1>
+                <div class="header-actions">
+                    <a href="/agent/notifications.html" style="position: relative; text-decoration: none; font-size: 1.5rem;">
+                        🔔
+                        <span id="notificationBadge" class="notification-badge hidden">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="card">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="avatar avatar-lg" id="userAvatar">A</div>
+                    <div>
+                        <h2 style="margin-bottom: 0.25rem;" id="userName">Agent</h2>
+                        <p class="text-gray" style="margin: 0;" id="userAgency"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-value" id="totalAppointments">0</div>
+                    <div class="stat-label">Total Appointments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📆</div>
+                    <div class="stat-value" id="todayAppointments">0</div>
+                    <div class="stat-label">Today's Appointments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏠</div>
+                    <div class="stat-value" id="totalProperties">0</div>
+                    <div class="stat-label">Properties</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-value" id="agentRating">0.0</div>
+                    <div class="stat-label">Rating</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3 class="chart-title">Weekly Appointments</h3>
+                <div class="bar-chart" id="performanceChart"></div>
+            </div>
+            
+            <h3>Quick Actions</h3>
+            <div class="quick-actions">
+                <a href="/agent/appointments.html" class="action-card">
+                    <div class="action-icon">📋</div>
+                    <div class="action-label">View Appointments</div>
+                </a>
+                <a href="/agent/properties.html" class="action-card">
+                    <div class="action-icon">🏢</div>
+                    <div class="action-label">My Properties</div>
+                </a>
+                <a href="/agent/add-property.html" class="action-card">
+                    <div class="action-icon">➕</div>
+                    <div class="action-label">Add Property</div>
+                </a>
+                <a href="/agent/performance.html" class="action-card">
+                    <div class="action-icon">📊</div>
+                    <div class="action-label">Performance</div>
+                </a>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Today's Appointments</h3>
+                </div>
+                <div id="todayAppointmentsList"></div>
+            </div>
+        </div>
+        
+        <nav class="bottom-nav">
+            <div class="bottom-nav-items">
+                <a href="/agent/dashboard.html" class="nav-item active">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Home</div>
+                </a>
+                <a href="/agent/appointments.html" class="nav-item">
+                    <div class="nav-icon">📅</div>
+                    <div class="nav-label">Appointments</div>
+                </a>
+                <a href="/agent/properties.html" class="nav-item">
+                    <div class="nav-icon">🏢</div>
+                    <div class="nav-label">Properties</div>
+                </a>
+                <a href="/agent/profile.html" class="nav-item">
+                    <div class="nav-icon">👤</div>
+                    <div class="nav-label">Profile</div>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/agent.js"></script>
+    <script>
+        const currentUser = requireAuth('agent');
+        if (!currentUser) return;
+        
+        document.getElementById('userName').textContent = currentUser.name;
+        document.getElementById('userAgency').textContent = currentUser.agency;
+        document.getElementById('userAvatar').textContent = getInitials(currentUser.name);
+        
+        const stats = getAgentStats(currentUser.id);
+        document.getElementById('totalAppointments').textContent = stats.totalAppointments;
+        document.getElementById('todayAppointments').textContent = stats.todayAppointments;
+        document.getElementById('totalProperties').textContent = stats.totalProperties;
+        document.getElementById('agentRating').textContent = calculateAgentRating(currentUser.id);
+        
+        const unreadCount = getUnreadNotificationCount(currentUser.id);
+        if (unreadCount > 0) {
+            const badge = document.getElementById('notificationBadge');
+            badge.textContent = unreadCount;
+            badge.classList.remove('hidden');
+        }
+        
+        // Performance chart
+        const performanceData = getAgentPerformance(currentUser.id);
+        const maxValue = Math.max(...performanceData.map(d => d.value), 1);
+        
+        document.getElementById('performanceChart').innerHTML = performanceData.map(data => {
+            const height = (data.value / maxValue) * 100;
+            return `
+                <div class="bar" style="height: ${height}%;">
+                    <div class="bar-value">${data.value}</div>
+                    <div class="bar-label">${data.label}</div>
+                </div>
+            `;
+        }).join('');
+        
+        // Today's appointments
+        const today = new Date().toISOString().split('T')[0];
+        const todayAppts = getAgentAppointments(currentUser.id, { status: 'today' });
+        
+        const list = document.getElementById('todayAppointmentsList');
+        if (todayAppts.length === 0) {
+            list.innerHTML = '<div class="empty-state"><p>No appointments today</p></div>';
+        } else {
+            list.innerHTML = todayAppts.map(appt => {
+                const details = getAppointmentDetails(appt.id);
+                return `
+                    <div class="list-item" onclick="window.location.href='/agent/appointment-details.html?id=${appt.id}'" style="cursor: pointer;">
+                        <div class="list-item-content">
+                            <div class="list-item-title">${details.property.name}</div>
+                            <div class="list-item-subtitle">
+                                ${appt.time} • ${details.customer.name}<br>
+                                📍 ${details.property.location}
+                            </div>
+                        </div>
+                        ${getStatusBadge(appt.status)}
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

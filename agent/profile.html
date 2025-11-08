@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Profile - TES Real Estate</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="header">
+            <div class="header-content">
+                <h1 class="header-title">Profile</h1>
+                <div></div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="card" style="text-align: center;">
+                <div class="avatar avatar-lg" id="avatar" style="margin: 0 auto 1rem;">A</div>
+                <h2 id="userName"></h2>
+                <p class="text-gray" id="userEmail"></p>
+                <span class="badge badge-agent">Agent</span>
+                <div style="margin-top: 1rem;">
+                    <div class="rating" id="rating"></div>
+                    <p class="text-gray text-sm" style="margin: 0.5rem 0 0 0;" id="ratingText"></p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Professional Information</h3>
+                <div class="list-item">
+                    <strong>License Number:</strong>
+                    <span id="userLicense"></span>
+                </div>
+                <div class="list-item">
+                    <strong>Agency:</strong>
+                    <span id="userAgency"></span>
+                </div>
+                <div class="list-item">
+                    <strong>Phone:</strong>
+                    <span id="userPhone"></span>
+                </div>
+                <div class="list-item">
+                    <strong>Email:</strong>
+                    <span id="userEmailInfo"></span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Performance Stats</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statAppointments">0</div>
+                        <div class="stat-label">Appointments</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statProperties">0</div>
+                        <div class="stat-label">Properties</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <button onclick="logout()" class="btn btn-secondary btn-block">Logout</button>
+            </div>
+        </div>
+        
+        <nav class="bottom-nav">
+            <div class="bottom-nav-items">
+                <a href="/agent/dashboard.html" class="nav-item">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Home</div>
+                </a>
+                <a href="/agent/appointments.html" class="nav-item">
+                    <div class="nav-icon">📅</div>
+                    <div class="nav-label">Appointments</div>
+                </a>
+                <a href="/agent/properties.html" class="nav-item">
+                    <div class="nav-icon">🏢</div>
+                    <div class="nav-label">Properties</div>
+                </a>
+                <a href="/agent/profile.html" class="nav-item active">
+                    <div class="nav-icon">👤</div>
+                    <div class="nav-label">Profile</div>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/agent.js"></script>
+    <script>
+        const currentUser = requireAuth('agent');
+        if (!currentUser) return;
+        
+        const user = getUserById(currentUser.id);
+        
+        document.getElementById('avatar').textContent = getInitials(user.name);
+        document.getElementById('userName').textContent = user.name;
+        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('userLicense').textContent = user.license;
+        document.getElementById('userAgency').textContent = user.agency;
+        document.getElementById('userPhone').textContent = user.phone;
+        document.getElementById('userEmailInfo').textContent = user.email;
+        
+        const rating = calculateAgentRating(user.id);
+        document.getElementById('rating').innerHTML = renderStars(Math.round(rating), false);
+        document.getElementById('ratingText').textContent = `${rating} out of 5`;
+        
+        const stats = getAgentStats(user.id);
+        document.getElementById('statAppointments').textContent = stats.totalAppointments;
+        document.getElementById('statProperties').textContent = stats.totalProperties;
+    </script>
+</body>
+</html>
