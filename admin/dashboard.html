@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - TES Real Estate</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper" style="padding-bottom: 0;">
+        <div class="header">
+            <div class="header-content">
+                <h1 class="header-title">Admin Dashboard</h1>
+                <a href="/admin/menu.html" style="text-decoration: none; font-size: 1.5rem;">☰</a>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="card">
+                <h2>System Overview</h2>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value" id="totalUsers">0</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏠</div>
+                    <div class="stat-value" id="totalProperties">0</div>
+                    <div class="stat-label">Properties</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-value" id="totalAppointments">0</div>
+                    <div class="stat-label">Appointments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👨‍💼</div>
+                    <div class="stat-value" id="totalAgents">0</div>
+                    <div class="stat-label">Active Agents</div>
+                </div>
+            </div>
+            
+            <h3>Quick Actions</h3>
+            <div class="quick-actions">
+                <a href="/admin/users.html" class="action-card">
+                    <div class="action-icon">👥</div>
+                    <div class="action-label">Manage Users</div>
+                </a>
+                <a href="/admin/agent-approvals.html" class="action-card">
+                    <div class="action-icon">✓</div>
+                    <div class="action-label">Approve Agents</div>
+                </a>
+                <a href="/admin/properties.html" class="action-card">
+                    <div class="action-icon">🏢</div>
+                    <div class="action-label">View Properties</div>
+                </a>
+                <a href="/admin/reviews.html" class="action-card">
+                    <div class="action-icon">⭐</div>
+                    <div class="action-label">Review Moderation</div>
+                </a>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Pending Approvals</h3>
+                </div>
+                <div id="pendingList"></div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Activity</h3>
+                </div>
+                <div id="activityList"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/admin.js"></script>
+    <script>
+        const currentUser = requireAuth('admin');
+        if (!currentUser) return;
+        
+        const stats = getAdminStats();
+        document.getElementById('totalUsers').textContent = stats.totalUsers;
+        document.getElementById('totalProperties').textContent = stats.totalProperties;
+        document.getElementById('totalAppointments').textContent = stats.totalAppointments;
+        document.getElementById('totalAgents').textContent = stats.totalAgents;
+        
+        // Pending approvals
+        const pendingAgents = getPendingAgents();
+        const pendingProperties = getAllProperties({ status: 'pending' });
+        const pendingReviews = getAllReviews({ status: 'pending' });
+        
+        const pendingList = document.getElementById('pendingList');
+        const totalPending = pendingAgents.length + pendingProperties.length + pendingReviews.length;
+        
+        if (totalPending === 0) {
+            pendingList.innerHTML = '<div class="empty-state"><p>No pending approvals</p></div>';
+        } else {
+            let html = '';
+            if (pendingAgents.length > 0) {
+                html += `<div class="list-item"><div><strong>${pendingAgents.length} Pending Agents</strong></div><a href="/admin/agent-approvals.html" class="btn btn-sm btn-primary">Review</a></div>`;
+            }
+            if (pendingProperties.length > 0) {
+                html += `<div class="list-item"><div><strong>${pendingProperties.length} Pending Properties</strong></div><a href="/admin/properties.html" class="btn btn-sm btn-primary">Review</a></div>`;
+            }
+            if (pendingReviews.length > 0) {
+                html += `<div class="list-item"><div><strong>${pendingReviews.length} Pending Reviews</strong></div><a href="/admin/reviews.html" class="btn btn-sm btn-primary">Review</a></div>`;
+            }
+            pendingList.innerHTML = html;
+        }
+        
+        // Recent activity
+        const activities = getRecentActivity(5);
+        const activityList = document.getElementById('activityList');
+        
+        if (activities.length === 0) {
+            activityList.innerHTML = '<div class="empty-state"><p>No recent activity</p></div>';
+        } else {
+            activityList.innerHTML = activities.map(activity => `
+                <div class="list-item">
+                    <div>
+                        <div class="list-item-title">${activity.title}</div>
+                        <div class="list-item-subtitle">${activity.description}</div>
+                    </div>
+                    <div class="text-gray text-xs">${timeAgo(activity.timestamp)}</div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

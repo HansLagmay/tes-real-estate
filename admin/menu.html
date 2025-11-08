@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - TES Real Estate Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper" style="padding-bottom: 0;">
+        <div class="header">
+            <div class="header-content">
+                <a href="/admin/dashboard.html" style="text-decoration: none; font-size: 1.5rem;">‹</a>
+                <h1 class="header-title">Menu</h1>
+                <div></div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="card" style="text-align: center;">
+                <div class="avatar avatar-lg" style="margin: 0 auto 1rem;">A</div>
+                <h2>System Administrator</h2>
+                <p class="text-gray">admin@tesrealestate.com</p>
+                <span class="badge badge-admin">Admin</span>
+            </div>
+            
+            <div class="card">
+                <h3>Management</h3>
+                <a href="/admin/dashboard.html" class="list-item" style="text-decoration: none; color: inherit;">
+                    <div>📊 Dashboard</div>
+                    <div>›</div>
+                </a>
+                <a href="/admin/users.html" class="list-item" style="text-decoration: none; color: inherit;">
+                    <div>👥 Users</div>
+                    <div>›</div>
+                </a>
+                <a href="/admin/properties.html" class="list-item" style="text-decoration: none; color: inherit;">
+                    <div>🏢 Properties</div>
+                    <div>›</div>
+                </a>
+                <a href="/admin/appointments.html" class="list-item" style="text-decoration: none; color: inherit;">
+                    <div>📅 Appointments</div>
+                    <div>›</div>
+                </a>
+                <a href="/admin/reviews.html" class="list-item" style="text-decoration: none; color: inherit;">
+                    <div>⭐ Reviews</div>
+                    <div>›</div>
+                </a>
+                <a href="/admin/agent-approvals.html" class="list-item" style="text-decoration: none; color: inherit;">
+                    <div>✓ Agent Approvals</div>
+                    <div>›</div>
+                </a>
+            </div>
+            
+            <button onclick="logout()" class="btn btn-secondary btn-block">Logout</button>
+        </div>
+    </div>
+    
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        const currentUser = requireAuth('admin');
+        if (!currentUser) return;
+    </script>
+</body>
+</html>

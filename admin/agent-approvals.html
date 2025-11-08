@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Approvals - TES Real Estate Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper" style="padding-bottom: 0;">
+        <div class="header">
+            <div class="header-content">
+                <a href="/admin/dashboard.html" style="text-decoration: none; font-size: 1.5rem;">‹</a>
+                <h1 class="header-title">Agent Approvals</h1>
+                <div></div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div id="agentsList"></div>
+        </div>
+    </div>
+    
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/admin.js"></script>
+    <script>
+        const currentUser = requireAuth('admin');
+        if (!currentUser) return;
+        
+        function loadAgents() {
+            const agents = getPendingAgents();
+            const container = document.getElementById('agentsList');
+            
+            if (agents.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">👨‍💼</div><p>No pending agent applications</p></div>';
+                return;
+            }
+            
+            container.innerHTML = agents.map(agent => `
+                <div class="card">
+                    <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
+                        <div class="avatar">${getInitials(agent.name)}</div>
+                        <div style="flex: 1;">
+                            <h4 style="margin-bottom: 0.25rem;">${agent.name}</h4>
+                            <p class="text-gray text-sm" style="margin: 0;">
+                                ${agent.email}<br>
+                                ${agent.phone}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="list-item">
+                        <strong>License Number:</strong>
+                        <span>${agent.license}</span>
+                    </div>
+                    <div class="list-item">
+                        <strong>Agency:</strong>
+                        <span>${agent.agency}</span>
+                    </div>
+                    <div class="list-item">
+                        <strong>Applied:</strong>
+                        <span>${formatDate(agent.createdAt)}</span>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button onclick="handleReject(${agent.id})" class="btn btn-danger" style="flex: 1;">Reject</button>
+                        <button onclick="handleApprove(${agent.id})" class="btn btn-success" style="flex: 1;">Approve</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        window.handleApprove = function(agentId) {
+            const result = approveAgent(agentId);
+            if (result.success) {
+                showSuccessAlert('Agent approved successfully');
+                loadAgents();
+            }
+        };
+        
+        window.handleReject = function(agentId) {
+            showModal('Reject Agent', 'Are you sure you want to reject this agent application?', () => {
+                const result = rejectAgent(agentId);
+                if (result.success) {
+                    showSuccessAlert('Agent rejected');
+                    loadAgents();
+                }
+            });
+        };
+        
+        loadAgents();
+    </script>
+</body>
+</html>

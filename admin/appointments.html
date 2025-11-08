@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments - TES Real Estate Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="header">
+            <div class="header-content">
+                <h1 class="header-title">Appointments</h1>
+                <a href="/admin/menu.html" style="text-decoration: none; font-size: 1.5rem;">☰</a>
+            </div>
+        </div>
+        <div class="content-area">
+            <div class="card">
+                <h3>Appointments Page</h3>
+                <p>This is the appointments page for administrators. Content will be dynamically loaded.</p>
+                <div id="content"></div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/admin.js"></script>
+    <script>
+        const currentUser = requireAuth('admin');
+        if (!currentUser) return;
+        // Page-specific logic goes here
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - TES Real Estate</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="header">
+            <div class="header-content">
+                <a href="/agent/dashboard.html" style="text-decoration: none; font-size: 1.5rem;">‹</a>
+                <h1 class="header-title">Notifications</h1>
+                <div></div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div id="notificationsList"></div>
+        </div>
+        
+        <nav class="bottom-nav">
+            <div class="bottom-nav-items">
+                <a href="/agent/dashboard.html" class="nav-item">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Home</div>
+                </a>
+                <a href="/agent/appointments.html" class="nav-item">
+                    <div class="nav-icon">📅</div>
+                    <div class="nav-label">Appointments</div>
+                </a>
+                <a href="/agent/properties.html" class="nav-item">
+                    <div class="nav-icon">🏢</div>
+                    <div class="nav-label">Properties</div>
+                </a>
+                <a href="/agent/profile.html" class="nav-item">
+                    <div class="nav-icon">👤</div>
+                    <div class="nav-label">Profile</div>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        const currentUser = requireAuth('agent');
+        if (!currentUser) return;
+        
+        const notifications = getFromStorage('notifications', [])
+            .filter(n => n.userId === currentUser.id)
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        const container = document.getElementById('notificationsList');
+        
+        if (notifications.length === 0) {
+            container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔔</div><p>No notifications</p></div>';
+        } else {
+            container.innerHTML = notifications.map(notif => `
+                <div class="card" style="background-color: ${notif.read ? 'var(--white)' : '#FEF3C7'};">
+                    <div style="display: flex; gap: 1rem;">
+                        <div style="font-size: 2rem;">🔔</div>
+                        <div style="flex: 1;">
+                            <h4 style="margin-bottom: 0.25rem;">${notif.title}</h4>
+                            <p class="text-gray" style="margin-bottom: 0.5rem;">${notif.message}</p>
+                            <p class="text-gray text-xs" style="margin: 0;">${timeAgo(notif.createdAt)}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            notifications.forEach(n => markNotificationAsRead(n.id));
+        }
+    </script>
+</body>
+</html>
