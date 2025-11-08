@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - TES Real Estate</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper" style="padding-bottom: 0;">
+        <div class="content-area" style="max-width: 500px; margin: 0 auto; padding-top: 2rem;">
+            <!-- Logo -->
+            <div class="logo-container">
+                <div class="logo-circle"></div>
+                <div class="logo-text">TES REAL ESTATE</div>
+            </div>
+            
+            <div class="card">
+                <h2 style="text-align: center; margin-bottom: 0.5rem;">Welcome Back</h2>
+                <p class="text-gray text-center" style="margin-bottom: 2rem;">
+                    Sign in to your account
+                </p>
+                
+                <!-- Role Selection -->
+                <div class="form-group">
+                    <label class="form-label">Select Your Role</label>
+                    <div class="role-selector">
+                        <button type="button" class="role-btn active" data-role="customer">
+                            👤<br>Customer
+                        </button>
+                        <button type="button" class="role-btn" data-role="agent">
+                            👨‍💼<br>Agent
+                        </button>
+                        <button type="button" class="role-btn" data-role="admin">
+                            🔐<br>Admin
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            class="form-control" 
+                            placeholder="Enter your email"
+                            required
+                        >
+                        <div class="form-error">Please enter a valid email</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            class="form-control" 
+                            placeholder="Enter your password"
+                            required
+                        >
+                        <div class="form-error">Please enter your password</div>
+                    </div>
+                    
+                    <div style="text-align: right; margin-bottom: 1.5rem;">
+                        <a href="/forgot-password.html" class="text-gold text-sm">
+                            Forgot Password?
+                        </a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Sign In
+                    </button>
+                </form>
+                
+                <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #E5E7EB;">
+                    <p class="text-gray text-sm">
+                        Don't have an account? 
+                        <a href="/register.html" class="text-gold font-bold">Sign Up</a>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Demo Credentials -->
+            <div class="info-box" style="margin-top: 1.5rem;">
+                <strong>Demo Credentials:</strong><br>
+                <small class="text-gray">
+                    Customer: hans@tesrealestate.com / Customer123!<br>
+                    Agent: juan@tesrealestate.com / Agent123!<br>
+                    Admin: admin@tesrealestate.com / Admin123!
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/utils.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // Role selection
+        let selectedRole = 'customer';
+        const roleButtons = document.querySelectorAll('.role-btn');
+        
+        roleButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                roleButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedRole = btn.dataset.role;
+            });
+        });
+        
+        // Form submission
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Validate inputs
+            if (!validateEmail(email)) {
+                showError(document.getElementById('email'), 'Please enter a valid email');
+                return;
+            }
+            
+            if (!password) {
+                showError(document.getElementById('password'), 'Please enter your password');
+                return;
+            }
+            
+            // Attempt login
+            const result = login(email, password, selectedRole);
+            
+            if (result.success) {
+                showSuccessAlert('Login successful!');
+                
+                // Redirect to appropriate dashboard
+                setTimeout(() => {
+                    redirectToDashboard(result.user.role);
+                }, 1000);
+            } else {
+                showErrorAlert(result.message);
+            }
+        });
+        
+        // Clear errors on input
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('input', () => {
+                hideError(input);
+            });
+        });
+        
+        // Check if already logged in
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+            redirectToDashboard(currentUser.role);
+        }
+    </script>
+</body>
+</html>
